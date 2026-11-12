@@ -1,0 +1,487 @@
+{
+  "info": {
+    "name": "LAB1 - Gestion Produits REST",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Lecture (GET)",
+      "item": [
+        {
+          "name": "Produit par identifiant",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "{{productId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut HTTP attendu\", () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test(\"Identifiant et titre\", () => { const data = pm.response.json(); pm.expect(data.id).to.equal(Number(pm.environment.get(\"productId\"))); pm.expect(data.title).to.be.a(\"string\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Recherche phone",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/products/search?q=phone",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "phone"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut HTTP attendu\", () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test(\"Résultats disponibles\", () => { pm.expect(pm.response.json().products).to.be.an(\"array\").and.not.be.empty; });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Création (POST)",
+      "item": [
+        {
+          "name": "Ajouter un produit et mémoriser son ID",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/products/add",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "add"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Casque Audio Sans Fil\",\n  \"price\": 129.99,\n  \"category\": \"audio\",\n  \"stock\": 25\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut HTTP attendu\", () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));",
+                  "pm.environment.unset(\"createdProductId\");\nif ([200, 201].includes(pm.response.code)) { const id = pm.response.json().id; if (Number.isInteger(id)) pm.environment.set(\"createdProductId\", id); }",
+                  "pm.test(\"Champs renvoyés\", () => { pm.expect(pm.response.json()).to.include({\"title\": \"Casque Audio Sans Fil\", \"price\": 129.99, \"category\": \"audio\", \"stock\": 25}); });",
+                  "pm.test(\"ID mémorisé dans l’environnement\", () => { pm.expect(pm.response.json().id).to.be.a(\"number\"); pm.expect(pm.environment.get(\"createdProductId\")).to.equal(pm.response.json().id); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Modification (PUT / PATCH)",
+      "item": [
+        {
+          "name": "Mettre à jour le produit",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "{{productId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Casque Audio Pro (Mise à jour)\",\n  \"price\": 149.99,\n  \"category\": \"audio\",\n  \"stock\": 10\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut HTTP attendu\", () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test(\"Champs renvoyés\", () => { pm.expect(pm.response.json()).to.include({\"title\": \"Casque Audio Pro (Mise à jour)\", \"price\": 149.99, \"category\": \"audio\", \"stock\": 10}); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Modifier uniquement le prix",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "{{productId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 139.99\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut HTTP attendu\", () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test(\"Champs renvoyés\", () => { pm.expect(pm.response.json()).to.include({\"price\": 139.99}); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Suppression (DELETE)",
+      "item": [
+        {
+          "name": "Simuler la suppression",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "{{productId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut HTTP attendu\", () => pm.expect(pm.response.code).to.be.oneOf([200, 204]));",
+                  "pm.test(\"Confirmation de suppression si corps JSON\", () => { if (pm.response.code === 200) pm.expect(pm.response.json()).to.include({ id: Number(pm.environment.get(\"productId\")), isDeleted: true }); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Relire le produit après suppression simulée",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "{{productId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut HTTP attendu\", () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test(\"Produit toujours disponible\", () => { pm.expect(pm.response.json().id).to.equal(Number(pm.environment.get(\"productId\"))); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Erreurs HTTP",
+      "item": [
+        {
+          "name": "JSON malformé",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/products/add",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "add"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\":",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut HTTP attendu\", () => pm.expect(pm.response.code).to.be.oneOf([400]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Produit inexistant",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/products/99999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "99999"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut HTTP attendu\", () => pm.expect(pm.response.code).to.be.oneOf([404]));",
+                  "pm.test(\"Message JSON\", () => { pm.expect(pm.response.json().message).to.be.a(\"string\").and.not.be.empty; });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Exercices",
+      "item": [
+        {
+          "name": "Produits de la catégorie smartphones",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/products/category/smartphones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "category",
+                "smartphones"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut HTTP attendu\", () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test(\"Catégorie smartphones\", () => { const products = pm.response.json().products; pm.expect(products).to.be.an(\"array\").and.not.be.empty; products.forEach(product => pm.expect(product.category).to.equal(\"smartphones\")); });",
+                  "pm.test(\"Temps de réponse inférieur à 500 ms\", () => { pm.expect(pm.response.responseTime).to.be.below(500); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ajouter un utilisateur fictif",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/add",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "add"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Amine\",\n  \"lastName\": \"Demo\",\n  \"age\": 28\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut HTTP attendu\", () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));",
+                  "pm.test(\"Champs renvoyés\", () => { pm.expect(pm.response.json()).to.include({\"firstName\": \"Amine\", \"lastName\": \"Demo\", \"age\": 28}); });",
+                  "pm.test(\"ID utilisateur généré\", () => { pm.expect(pm.response.json().id).to.be.a(\"number\"); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,17 +1,19 @@
-# LAB 1 — Conception et test d’une API REST
+# Lab 1 — API REST avec HTTP et Postman
 
-TP sur DummyJSON avec Postman, réalisé par Mohammed Noureddine.
+TP de Mohammed Noureddine sur l’API de démonstration DummyJSON.
 
-## Lancer le TP
+## Exécution dans Postman Web
 
-1. Importer `LAB1.postman_collection.json` et `Demo_API_Env.postman_environment.json` dans Postman.
-2. Sélectionner **Demo API Env**, ouvrir **LAB1 - Gestion Produits REST** et cliquer sur **Run collection**.
-3. Consulter les assertions dans les résultats du Runner et les observations dans `Rapport_LAB1.pdf`.
+### Résultats de la collection
 
-Exécution en ligne de commande avec Newman
+![Résultats d’exécution dans le Runner Postman](Postman_Runner.jpg)
 
-```sh
-npx newman run LAB1.postman_collection.json -e Demo_API_Env.postman_environment.json
-```
+### Création d’un produit
 
-La campagne a exécuté 11 requêtes et validé 23 assertions sur 24. Le seuil de 500 ms a échoué avec 3 866 ms sur la requête smartphones. Les écritures de DummyJSON sont simulées.
+La requête POST a renvoyé **201 Created**.
+
+![Réponse 201 Created dans Postman](Postman_POST_201.jpg)
+
+## Rapport
+
+[Consulter le rapport du Lab 1 (PDF)](Rapport_LAB1.pdf)
